@@ -15,13 +15,19 @@ class TasksController extends Controller
      */
     public function index()
     {
-        $tasks = Task::all();
+       if(\Auth::check()) {
+           $tasks = Task::all();
+           $user = \Auth::user();
         
         return view('tasks.index', [
             'tasks' => $tasks,
             ]);
         //
+    }  else {
+        return redirect('/');
+      }
     }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -49,11 +55,13 @@ class TasksController extends Controller
         $this->validate($request, [
             'status' => 'required|max:10',
             'content' => 'required|max:191',
+            
             ]);
             
         $task = new Task;
         $task->status = $request->status;
         $task->content = $request->content;
+        $task->user_id = \Auth::id();
         $task->save();
         
         return redirect('/');
@@ -70,9 +78,14 @@ class TasksController extends Controller
     {
         $task = Task::find($id);
         
+        if (\Auth::id() === $task->user_id){
+            
         return view('tasks.show', [
             'task' => $task,
             ]);
+     }  else {
+        return redirect('/');         
+            }
         //
     }
 
@@ -83,15 +96,17 @@ class TasksController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
-    {
+    
+      {
         $task = Task::find($id);
+        $task->user_id = \Auth::id();
         
         return view('tasks.edit', [
             'task' => $task,
             ]);
         //
-    }
-
+     }
+       
     /**
      * Update the specified resource in storage.
      *
@@ -122,14 +137,15 @@ class TasksController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-    {
+     {
         $task = Task::find($id);
         
-        if (\Auth::id() === $task->user_id) {
-            $task->delete();
-        }
+        $task->delete();
+        
         
         return redirect('/');
+        
+        
         //
     }
 }
