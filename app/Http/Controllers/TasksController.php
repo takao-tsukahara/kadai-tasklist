@@ -100,13 +100,17 @@ class TasksController extends Controller
     
       {
         $task = Task::find($id);
-        $task->user_id = \Auth::id();
+       
+       if (\Auth::id() === $task->user_id){
         
         return view('tasks.edit', [
             'task' => $task,
             ]);
-        //
-     }
+     }  else {
+        return redirect('/');         
+            }
+         //   
+     }        
        
     /**
      * Update the specified resource in storage.
@@ -141,9 +145,10 @@ class TasksController extends Controller
      {
         $task = Task::find($id);
         
-        $task->delete();
-        
-        
+       if (\Auth::id() === $task->user_id) {
+          $task->delete();
+       }
+       
         return redirect('/');
         
         
